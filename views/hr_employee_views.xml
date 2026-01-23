@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_employee_form_inherit_benefit" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.benefit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Employee Type Selection -->
+            <xpath expr="//field[@name='category_ids']" position="before">
+                <field name="employee_type" widget="selection"/>
+            </xpath>
+            
+            <!-- Move Identification ID (Cedula) to top (Below Name or in Title block if possible, or usually first group) -->
+            <!-- Standard Odoo Employee View usually has identification_id in Private Information tab or header. 
+                 User wants it "en los primeros datos del formulario". 
+                 Let's try to put it right after the name or in the main header tag area if allowed, or top of first group. 
+                 Finding a stable hook: usually `h1` contains name. 
+                 Let's place it below the name in the header/title div.
+            -->
+            <xpath expr="//div[hasclass('oe_title')]" position="inside">
+                <label for="identification_id" string="Cédula de Identidad"/>
+                <h3>
+                    <div class="d-flex flex-row align-items-center">
+                        <field name="identification_type" class="oe_inline" nolabel="1" style="width: auto !important; margin-right: 5px !important; flex-grow: 0;"/>
+                        <field name="identification_id" placeholder="Cédula de Identidad" class="oe_inline" style="width: auto !important; flex-grow: 0;"/>
+                    </div>
+                </h3>
+            </xpath>
+
+            <!-- Hide original identification_id to avoid duplication if it exists elsewhere active 
+                 (Usually in 'Private Information' tab -> group 'Citizenship'). 
+                 We can try to find it and make it invisible or just leave it. 
+                 Ideally, we locate it and move it, but 'replace' can be risky if removed by another module. 
+                 Let's just position it prominently as requested.
+            -->
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hr_benefit.WebcamField" owl="1">
+        <div class="o_field_widget o_field_benefit_webcam">
+            <!-- If we have an image, show it -->
+            <div t-if="props.record.data[props.name]" class="position-relative d-inline-block">
+                <img t-att-src="'data:image/png;base64,' + props.record.data[props.name]" 
+                     class="img img-fluid" 
+                     style="max-width: 150px; max-height: 150px; border: 1px solid #ccc;"
+                     alt="Evidence"/>
+                <button class="btn btn-sm btn-danger position-absolute top-0 end-0" 
+                        t-on-click="reset"
+                        title="Eliminar Foto"
+                        t-if="!props.readonly">
+                    <i class="fa fa-times"/>
+                </button>
+            </div>
+            
+            <!-- If no image, show camera controls -->
+            <div t-else="">
+                <t t-if="!state.isStreamActive">
+                     <button class="btn btn-primary btn-sm" t-on-click="startCamera" t-if="!props.readonly">
+                        <i class="fa fa-camera"/> Cámara
+                     </button>
+                     <button class="btn btn-secondary btn-sm ms-1" t-on-click="triggerFileUpload" t-if="!props.readonly">
+                        <i class="fa fa-upload"/> Subir
+                     </button>
+                     <input type="file" t-ref="fileInput" class="d-none" accept="image/*" t-on-change="onFileChange"/>
+                </t>
+                
+                <div t-att-class="state.isStreamActive ? 'd-flex flex-column align-items-center' : 'd-none'">
+                    <video t-ref="video" style="width: 100%; max-width: 320px;" autoplay="autoplay" muted="muted" playsinline="playsinline"/>
+                    <div class="mt-1">
+                        <button class="btn btn-success" t-on-click="takePhoto">
+                            <i class="fa fa-check"/> Capturar
+                        </button>
+                        <button class="btn btn-secondary ms-1" t-on-click="stopCamera">
+                            <i class="fa fa-ban"/> Cancelar
+                        </button>
+                    </div>
+                </div>
+                
+                <canvas t-ref="canvas" style="display: none;"/>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menus -->
+    <menuitem id="menu_hr_benefit_root" name="Beneficios" sequence="20" web_icon="hr_benefit,static/description/icon.png"/>
+    <menuitem id="menu_hr_benefit_manage" name="Gestión" parent="menu_hr_benefit_root" sequence="10"/>
+    <menuitem id="menu_hr_benefit_report" name="Informes" parent="menu_hr_benefit_root" sequence="20"/>
+
+    <!-- Benefit Session Views -->
+    <record id="view_benefit_session_form" model="ir.ui.view">
+        <field name="name">benefit.session.form</field>
+        <field name="model">benefit.session</field>
+        <field name="arch" type="xml">
+            <form string="Jornada de Beneficio">
+                <header>
+                    <button name="action_confirm" string="Confirmar" type="object" invisible="state != 'draft'" class="oe_highlight"/>
+                    <button name="action_done" string="Finalizar" type="object" invisible="state != 'confirmed'" class="oe_highlight"/>
+                    <button name="action_draft" string="Cambiar a Borrador" type="object" invisible="state not in ('confirmed', 'done')"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <field name="line_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="product_id"/>
+                                <field name="quantity"/>
+                            </list>
+                        </field>
+                        <group>
+                            <label for="start_date" string="Vigencia"/>
+                            <div class="o_row">
+                                <field name="start_date" widget="daterange" options="{'related_end_date': 'end_date'}"/>
+                                <i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
+                                <field name="end_date" widget="daterange" options="{'related_start_date': 'start_date'}"/>
+                            </div>
+                            <field name="department_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_benefit_session_tree" model="ir.ui.view">
+        <field name="name">benefit.session.tree</field>
+        <field name="model">benefit.session</field>
+        <field name="arch" type="xml">
+            <list string="Jornadas">
+                <field name="name"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="product_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_benefit_session" model="ir.actions.act_window">
+        <field name="name">Jornadas</field>
+        <field name="res_model">benefit.session</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_benefit_session" action="action_benefit_session" parent="menu_hr_benefit_manage" sequence="10"/>
+
+    <!-- Benefit Delivery List Views -->
+    <record id="view_benefit_delivery_list_form" model="ir.ui.view">
+        <field name="name">benefit.delivery.list.form</field>
+        <field name="model">benefit.delivery.list</field>
+        <field name="arch" type="xml">
+            <form string="Lista de Entrega">
+                <header>
+                    <button name="action_confirm" string="Confirmar" type="object" invisible="state != 'draft'" class="oe_highlight"/>
+                    <button name="action_validate" string="Validar Entrega" type="object" invisible="state != 'confirmed'" class="oe_highlight" confirm="¿Está seguro que desea validar esta entrega? Esto validará la recepción de beneficios para todos los empleados de la lista."/>
+                    <button name="action_draft" string="Borrador" type="object" invisible="state != 'confirmed'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,delivered"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="session_id" readonly="state != 'draft'"/>
+                            <field name="responsible_id" readonly="state == 'delivered'"/>
+                        </group>
+                        <group>
+                            <field name="date_delivered"/>
+                            <field name="department_id" readonly="state != 'draft'"/>
+                            <button name="action_load_employees" string="Cargar Departamento" type="object" class="btn-secondary" invisible="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Beneficiarios">
+                            <field name="line_ids" readonly="state == 'delivered'">
+                                <list editable="bottom">
+                                    <field name="employee_id"/>
+                                    <field name="qty_delivered"/>
+                                    <field name="evidence_photo" widget="benefit_webcam" optional="show"/>
+                                    <field name="state" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_benefit_delivery_list_tree" model="ir.ui.view">
+        <field name="name">benefit.delivery.list.tree</field>
+        <field name="model">benefit.delivery.list</field>
+        <field name="arch" type="xml">
+            <list string="Listas de Entrega">
+                <field name="name"/>
+                <field name="session_id"/>
+                <field name="responsible_id"/>
+                <field name="total_delivered" sum="Total"/>
+                <field name="state"/>
+                <field name="date_delivered"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_benefit_delivery_list_search" model="ir.ui.view">
+        <field name="name">benefit.delivery.list.search</field>
+        <field name="model">benefit.delivery.list</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Listas">
+                <field name="name"/>
+                <field name="session_id"/>
+                <field name="responsible_id"/>
+                <field name="department_id"/>
+                <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmado" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Entregado" name="delivered" domain="[('state', '=', 'delivered')]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Jornada" name="group_session" context="{'group_by': 'session_id'}"/>
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_benefit_delivery_list" model="ir.actions.act_window">
+        <field name="name">Listas de Entrega</field>
+        <field name="res_model">benefit.delivery.list</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Cree una nueva lista de entrega de beneficios.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_benefit_delivery_list" action="action_benefit_delivery_list" parent="menu_hr_benefit_manage" sequence="20"/>
+
+    <!-- Individual Delivery Views -->
+    <record id="view_benefit_delivery_line_form" model="ir.ui.view">
+        <field name="name">benefit.delivery.line.form</field>
+        <field name="model">benefit.delivery.line</field>
+        <field name="arch" type="xml">
+            <form string="Entrega Individual">
+                <header>
+                    <button name="action_confirm_delivery" string="Entregar Beneficio" type="object" invisible="state != 'draft'" class="oe_highlight"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="session_id" domain="[('is_active', '=', True)]" readonly="state == 'delivered'" options="{'no_create': True}"/>
+                            <field name="employee_id" readonly="state == 'delivered'"/>
+                        </group>
+                        <group>
+                            <field name="date_delivered" readonly="1"/>
+                            <field name="evidence_photo" widget="benefit_webcam" readonly="state == 'delivered'"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_benefit_delivery_line_tree" model="ir.ui.view">
+        <field name="name">benefit.delivery.line.tree</field>
+        <field name="model">benefit.delivery.line</field>
+        <field name="arch" type="xml">
+            <list string="Entregas Individuales">
+                <field name="session_id"/>
+                <field name="employee_id"/>
+                <field name="date_delivered"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_benefit_delivery_line_individual" model="ir.actions.act_window">
+        <field name="name">Entregas Individuales</field>
+        <field name="res_model">benefit.delivery.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('list_id', '=', False)]</field>
+        <field name="context">{'default_list_id': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Registre una nueva entrega individual.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_benefit_delivery_individual" action="action_benefit_delivery_line_individual" parent="menu_hr_benefit_manage" sequence="30"/>
+
+    <!-- Reporting / Pivot -->
+    <record id="view_benefit_delivery_line_pivot" model="ir.ui.view">
+        <field name="name">benefit.delivery.line.pivot</field>
+        <field name="model">benefit.delivery.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de Beneficios">
+                <field name="session_id" type="row"/>
+                <field name="employee_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="qty_delivered" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <record id="action_benefit_reporting" model="ir.actions.act_window">
+        <field name="name">Análisis de Entregas</field>
+        <field name="res_model">benefit.delivery.line</field>
+        <field name="view_mode">pivot</field>
+    </record>
+
+    <menuitem id="menu_benefit_reporting" action="action_benefit_reporting" parent="menu_hr_benefit_report" sequence="10"/>
+
+</odoo>

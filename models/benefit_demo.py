@@ -50,13 +50,14 @@ class BenefitDemo(models.AbstractModel):
             dept = random.choice(assignable_depts)
             job_title = random.choice(['Analista', 'Asistente', 'Gerente', 'Coordinador', 'Obrero', 'Chofer'])
             emp_type = random.choice(['employee', 'hp'])
-            cedula = f"V-{random.randint(1000000, 30000000)}"
+            cedula = str(random.randint(1000000, 30000000))
 
             self.env['hr.employee'].create({
                 'name': full_name,
                 'department_id': dept.id,
                 'job_title': job_title,
                 'employee_type': emp_type,
+                'identification_type': 'V',
                 'identification_id': cedula,
                 'work_email': f"{first_name.lower()}.{last_name.lower()}{i}@example.com"
             })

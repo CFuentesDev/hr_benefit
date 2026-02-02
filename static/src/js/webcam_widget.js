@@ -8,18 +8,46 @@ import { Component, useState, useRef, onWillStart } from "@odoo/owl";
 export class BenefitWebcamField extends Component {
     setup() {
         this.videoRef = useRef("video");
-        this.videoRef = useRef("video");
         this.canvasRef = useRef("canvas");
         this.fileInputRef = useRef("fileInput");
 
         this.state = useState({
             isStreamActive: false,
-            imgData: this.props.record.data[this.props.name] || null,
+            imgData: null, // Only used for new captures/uploads not yet saved
+            showPreview: false,
         });
 
         onWillStart(() => {
-            // If we already have data, we might show it, but logic below handles it
+            // No specific init needed, we rely on props and state
         });
+    }
+
+    togglePreview() {
+        this.state.showPreview = !this.state.showPreview;
+    }
+
+    get imageUrl() {
+        // Priority 1: Newly captured/uploaded image (Unsaved)
+        if (this.state.imgData) {
+            return "data:image/png;base64," + this.state.imgData;
+        }
+
+        // Priority 2: Existing data from record
+        const value = this.props.record.data[this.props.name];
+        if (!value) {
+            return null;
+        }
+
+        // Check if value is bin_size (e.g. "24.5 Kb") or raw base64
+        // Heuristic: bin_size is short (< 50 chars) and doesn't look like base64 header
+        // Simple check: if it's barely text, it's a size. If it's huge, it's base64.
+        if (value.length < 100) {
+            // Assume it's a saved record with bin_size optimized value -> Return URL
+            return `/web/image/${this.props.record.resModel}/${this.props.record.resId}/${this.props.name}?unique=${Date.now()}`;
+        }
+
+        // Default: Assume base64 string
+        return "data:image/png;base64," + value;
     }
 
     async startCamera() {
@@ -28,7 +56,6 @@ export class BenefitWebcamField extends Component {
             this.videoRef.el.srcObject = stream;
             this.videoRef.el.play();
             this.state.isStreamActive = true;
-            this.stream = stream;
             this.stream = stream;
         } catch (err) {
             console.error("Error accessing camera: ", err);
@@ -72,10 +99,6 @@ export class BenefitWebcamField extends Component {
 
         // Get base64 string
         const dataURL = canvas.toDataURL("image/png");
-        // Odoo Binary fields expect base64 without prefix usually, or we can just save it. 
-        // Standard Odoo binary field usually strips 'data:image/png;base64,' but let's check.
-        // Actually, the web client usually handles standard base64 content. 
-        // We will strip the prefix to be safe as Odoo backend expects raw base64.
         const base64Data = dataURL.split(',')[1];
 
         this.state.imgData = base64Data;

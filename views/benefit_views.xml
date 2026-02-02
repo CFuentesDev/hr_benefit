@@ -86,18 +86,19 @@
                         <group>
                             <field name="session_id" readonly="state != 'draft'"/>
                             <field name="responsible_id" readonly="state == 'delivered'"/>
+                            <field name="evidence_photo" widget="benefit_webcam" readonly="state == 'delivered'"/>
                         </group>
                         <group>
                             <field name="date_delivered"/>
-                            <field name="department_id" readonly="state != 'draft'"/>
-                            <button name="action_load_employees" string="Cargar Departamento" type="object" class="btn-secondary" invisible="state != 'draft'"/>
+                            <field name="department_ids" widget="many2many_tags" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <button name="action_load_employees" string="Cargar Departamentos" type="object" class="btn-secondary" invisible="state != 'draft'"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Beneficiarios">
                             <field name="line_ids" readonly="state == 'delivered'">
                                 <list editable="bottom">
-                                    <field name="employee_id"/>
+                                    <field name="employee_id" context="{'benefit_search_cedula': True}"/>
                                     <field name="qty_delivered"/>
                                     <field name="evidence_photo" widget="benefit_webcam" optional="show"/>
                                     <field name="state" column_invisible="1"/>
@@ -134,7 +135,7 @@
                 <field name="name"/>
                 <field name="session_id"/>
                 <field name="responsible_id"/>
-                <field name="department_id"/>
+                <field name="department_ids"/>
                 <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
                 <filter string="Confirmado" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
                 <filter string="Entregado" name="delivered" domain="[('state', '=', 'delivered')]"/>
@@ -150,6 +151,7 @@
         <field name="name">Listas de Entrega</field>
         <field name="res_model">benefit.delivery.list</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_group_state': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Cree una nueva lista de entrega de beneficios.
@@ -173,7 +175,7 @@
                     <group>
                         <group>
                             <field name="session_id" domain="[('is_active', '=', True)]" readonly="state == 'delivered'" options="{'no_create': True}"/>
-                            <field name="employee_id" readonly="state == 'delivered'"/>
+                            <field name="employee_id" readonly="state == 'delivered'" context="{'benefit_search_cedula': True}"/>
                         </group>
                         <group>
                             <field name="date_delivered" readonly="1"/>
@@ -198,12 +200,30 @@
         </field>
     </record>
 
+    <record id="view_benefit_delivery_line_search" model="ir.ui.view">
+        <field name="name">benefit.delivery.line.search</field>
+        <field name="model">benefit.delivery.line</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Entregas Individuales">
+                <field name="session_id"/>
+                <field name="employee_id"/>
+                <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Entregado" name="delivered" domain="[('state', '=', 'delivered')]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Jornada" name="group_session" context="{'group_by': 'session_id'}"/>
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Empleado" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_benefit_delivery_line_individual" model="ir.actions.act_window">
         <field name="name">Entregas Individuales</field>
         <field name="res_model">benefit.delivery.line</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('list_id', '=', False)]</field>
-        <field name="context">{'default_list_id': False}</field>
+        <field name="context">{'default_list_id': False, 'search_default_group_state': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Registre una nueva entrega individual.

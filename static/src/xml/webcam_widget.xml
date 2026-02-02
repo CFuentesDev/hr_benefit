@@ -3,17 +3,27 @@
     <t t-name="hr_benefit.WebcamField" owl="1">
         <div class="o_field_widget o_field_benefit_webcam">
             <!-- If we have an image, show it -->
-            <div t-if="props.record.data[props.name]" class="position-relative d-inline-block">
-                <img t-att-src="'data:image/png;base64,' + props.record.data[props.name]" 
+            <div t-if="imageUrl" class="position-relative d-inline-block">
+                <img t-att-src="imageUrl" 
                      class="img img-fluid" 
-                     style="max-width: 150px; max-height: 150px; border: 1px solid #ccc;"
-                     alt="Evidence"/>
+                     style="max-width: 150px; max-height: 150px; border: 1px solid #ccc; cursor: zoom-in;"
+                     alt="Evidence"
+                     t-on-click="togglePreview"/>
                 <button class="btn btn-sm btn-danger position-absolute top-0 end-0" 
                         t-on-click="reset"
                         title="Eliminar Foto"
                         t-if="!props.readonly">
                     <i class="fa fa-times"/>
                 </button>
+                
+                <!-- Lightbox / Modal for Zoom -->
+                <div t-if="state.showPreview" 
+                     class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
+                     style="background: rgba(0,0,0,0.8); z-index: 9999; cursor: zoom-out;"
+                     t-on-click="togglePreview">
+                    <img t-att-src="imageUrl" 
+                         style="max-width: 90%; max-height: 90%; box-shadow: 0 0 20px rgba(0,0,0,0.5); border-radius: 4px;"/>
+                </div>
             </div>
             
             <!-- If no image, show camera controls -->

@@ -9,7 +9,7 @@ class BenefitDeliveryList(models.Model):
     name = fields.Char(string='Referencia', required=True, copy=False, readonly=True, default=lambda self: _('Nuevo'))
     session_id = fields.Many2one('benefit.session', string='Jornada', required=True, domain=[('is_active', '=', True)], default=lambda self: self._default_session())
     responsible_id = fields.Many2one('hr.employee', string='Responsable de Retiro', required=True)
-    department_id = fields.Many2one('hr.department', string='Departamento', help='Departamento para carga masiva de empleados')
+    department_ids = fields.Many2many('hr.department', string='Departamentos', help='Departamentos para carga masiva de empleados')
     line_ids = fields.One2many('benefit.delivery.line', 'list_id', string='Beneficiarios')
     state = fields.Selection([
         ('draft', 'Borrador'),
@@ -17,6 +17,7 @@ class BenefitDeliveryList(models.Model):
         ('delivered', 'Entregado')
     ], string='Estado', default='draft', track_visibility='onchange')
     date_delivered = fields.Datetime(string='Fecha de Entrega', readonly=True)
+    evidence_photo = fields.Binary(string="Foto Responsable", attachment=True, help="Evidencia visual de la entrega al responsable.")
     
     total_delivered = fields.Float(string='Total Entregado', compute='_compute_total_delivered', store=True)
 
@@ -38,24 +39,23 @@ class BenefitDeliveryList(models.Model):
 
     def action_load_employees(self):
         self.ensure_one()
-        if not self.department_id:
-            raise ValidationError(_("Seleccione un departamento para cargar empleados."))
+        if not self.department_ids:
+            raise ValidationError(_("Seleccione al menos un departamento para cargar empleados."))
         
         # Determine allowed departments from session
         allowed_depts = self.session_id.department_ids
-        target_dept = self.department_id
+        target_depts = self.department_ids
         
-        # Optional: Check if target_dept is allowed?
-        # If allowed_depts is set, we strictly enforce it? Use context or just check.
-        if allowed_depts and target_dept not in allowed_depts:
-             # Check if target_dept is a child of allowed_depts? 
-             # For simplicity, if allowed_depts is set, ensure target_dept is in it.
-             # Or do we filter employees?
-             # Let's assume simpler logic: Load active employees of that department.
-             pass
+        # Check if selected departments are allowed in the session
+        if allowed_depts:
+            invalid_depts = target_depts - allowed_depts
+            if invalid_depts:
+                 # Optional: raise error or just ignore invalid ones? 
+                 # Let's clean it up or raise. Raising is safer.
+                 raise ValidationError(_("Los siguientes departamentos no están permitidos en esta jornada: %s") % ", ".join(invalid_depts.mapped('name')))
 
         employees = self.env['hr.employee'].search([
-            ('department_id', '=', target_dept.id),
+            ('department_id', 'in', target_depts.ids),
             ('active', '=', True)
         ])
         

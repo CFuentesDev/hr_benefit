@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.module.category" id="module_category_hr_benefit">
+        <field name="name">Gestión de Beneficios</field>
+        <field name="description">Ayuda a gestionar la entrega de beneficios y combos a empleados.</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="group_benefit_user" model="res.groups">
+        <field name="name">Usuario</field>
+        <field name="category_id" ref="module_category_hr_benefit"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_benefit_manager" model="res.groups">
+        <field name="name">Administrador</field>
+        <field name="category_id" ref="module_category_hr_benefit"/>
+        <field name="implied_ids" eval="[(4, ref('group_benefit_user'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <data noupdate="1">
+        <!-- Record Rules -->
+        
+        <!-- Benefit Delivery List: User sees own, Manager sees all -->
+        <record id="rule_benefit_delivery_list_user" model="ir.rule">
+            <field name="name">Benefit List: User Own Documents</field>
+            <field name="model_id" ref="model_benefit_delivery_list"/>
+            <field name="groups" eval="[(4, ref('group_benefit_user'))]"/>
+            <field name="domain_force">[('create_uid', '=', user.id)]</field>
+        </record>
+
+        <record id="rule_benefit_delivery_list_manager" model="ir.rule">
+            <field name="name">Benefit List: Manager All</field>
+            <field name="model_id" ref="model_benefit_delivery_list"/>
+            <field name="groups" eval="[(4, ref('group_benefit_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+
+        <!-- Benefit Delivery Line: User sees own (or from their lists), Manager sees all -->
+        <record id="rule_benefit_delivery_line_user" model="ir.rule">
+            <field name="name">Benefit Line: User Own Documents</field>
+            <field name="model_id" ref="model_benefit_delivery_line"/>
+            <field name="groups" eval="[(4, ref('group_benefit_user'))]"/>
+            <field name="domain_force">['|', ('create_uid', '=', user.id), ('list_id.create_uid', '=', user.id)]</field>
+        </record>
+
+        <record id="rule_benefit_delivery_line_manager" model="ir.rule">
+            <field name="name">Benefit Line: Manager All</field>
+            <field name="model_id" ref="model_benefit_delivery_line"/>
+            <field name="groups" eval="[(4, ref('group_benefit_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+    </data>
+</odoo>

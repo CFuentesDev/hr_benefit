@@ -1,13 +1,15 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
+
 class BenefitDeliveryLine(models.Model):
     _name = 'benefit.delivery.line'
     _description = 'Línea de Entrega de Beneficio'
 
     list_id = fields.Many2one('benefit.delivery.list', string='Lista de Entrega', ondelete='cascade', required=False) # Now optional
     employee_id = fields.Many2one('hr.employee', string='Empleado', required=True)
-    
+    employee_department = fields.Many2one('hr.department', string='Departamento', related='employee_id.department_id', required=True)
+
     # State management
     state = fields.Selection([
         ('draft', 'Borrador'),

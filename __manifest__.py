@@ -10,6 +10,7 @@
     'author': 'CFuentesDev',
     'depends': ['base', 'hr', 'product'],
     'data': [
+        'security/benefit_security.xml',
         'security/ir.model.access.csv',
         'views/benefit_views.xml',
         'views/hr_employee_views.xml',

@@ -1,6 +1,14 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
+class BenefitDeliveryListOrigin(models.Model):
+    _name = 'benefit.delivery.list.origin'
+    _description = 'Procedencia de la Lista de Entrega de Beneficios'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+
+    name = fields.Char(string='Nombre', required=True)
+
+
 class BenefitDeliveryList(models.Model):
     _name = 'benefit.delivery.list'
     _description = 'Lista de Entrega de Beneficios'
@@ -8,6 +16,7 @@ class BenefitDeliveryList(models.Model):
 
     name = fields.Char(string='Referencia', required=True, copy=False, readonly=True, default=lambda self: _('Nuevo'))
     session_id = fields.Many2one('benefit.session', string='Jornada', required=True, domain=[('is_active', '=', True)], default=lambda self: self._default_session())
+    origin_list = fields.Many2one('benefit.delivery.list.origin', string='Procedencia')
     responsible_id = fields.Many2one('hr.employee', string='Responsable de Retiro', required=True)
     department_ids = fields.Many2many('hr.department', string='Departamentos', help='Departamentos para carga masiva de empleados')
     line_ids = fields.One2many('benefit.delivery.line', 'list_id', string='Beneficiarios')

@@ -1,5 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_benefit_session,benefit.session,model_benefit_session,base.group_user,1,1,1,1
-access_benefit_delivery_list,benefit.delivery.list,model_benefit_delivery_list,base.group_user,1,1,1,1
-access_benefit_delivery_line,benefit.delivery.line,model_benefit_delivery_line,base.group_user,1,1,1,1
-access_benefit_session_line,benefit.session.line,model_benefit_session_line,base.group_user,1,1,1,1
+access_benefit_session,benefit.session,model_benefit_session,hr_benefit.group_benefit_user,1,1,1,1
+access_benefit_delivery_list_origin,benefit.delivery.list.origin,model_benefit_delivery_list_origin,hr_benefit.group_benefit_user,1,1,1,1
+access_benefit_delivery_list,benefit.delivery.list,model_benefit_delivery_list,hr_benefit.group_benefit_user,1,1,1,1
+access_benefit_delivery_line,benefit.delivery.line,model_benefit_delivery_line,hr_benefit.group_benefit_user,1,1,1,1
+access_benefit_session_line,benefit.session.line,model_benefit_session_line,hr_benefit.group_benefit_user,1,1,1,1

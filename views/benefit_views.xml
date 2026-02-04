@@ -84,13 +84,13 @@
                     </div>
                     <group>
                         <group>
-                            <field name="session_id" readonly="state != 'draft'"/>
+                            <field name="session_id" readonly="state != 'draft'" options="{'no_create': True}"/>
                             <field name="responsible_id" readonly="state == 'delivered'"/>
                             <field name="evidence_photo" widget="benefit_webcam" readonly="state == 'delivered'"/>
                         </group>
                         <group>
                             <field name="date_delivered"/>
-                            <field name="origin_list"/>
+                            <field name="origin_id"/>
                             <field name="department_ids" widget="many2many_tags" options="{'no_create': True}" readonly="state != 'draft'"/>
                             <button name="action_load_employees" string="Cargar Departamentos" type="object" class="btn-secondary" invisible="state != 'draft'"/>
                         </group>

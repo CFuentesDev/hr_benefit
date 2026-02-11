@@ -99,9 +99,9 @@
                         <page string="Beneficiarios">
                             <field name="line_ids" readonly="state == 'delivered'">
                                 <list editable="bottom">
-                                    <field name="employee_id" context="{'benefit_search_cedula': True}"/>
+                                    <field name="employee_id" context="{'benefit_search_cedula': True, 'active_test': False}"/>
                                     <field name="qty_delivered"/>
-                                    <field name="evidence_photo" widget="benefit_webcam" optional="show"/>
+                                    <field name="evidence_photo" required="1" widget="benefit_webcam" optional="show"/>
                                     <field name="state" column_invisible="1"/>
                                 </list>
                             </field>
@@ -176,7 +176,7 @@
                     <group>
                         <group>
                             <field name="session_id" domain="[('is_active', '=', True)]" readonly="state == 'delivered'" options="{'no_create': True}"/>
-                            <field name="employee_id" readonly="state == 'delivered'" context="{'benefit_search_cedula': True}"/>
+                            <field name="employee_id" readonly="state == 'delivered'" context="{'benefit_search_cedula': True, 'active_test': False}"/>
                         </group>
                         <group>
                             <field name="date_delivered" readonly="1"/>

@@ -58,6 +58,9 @@ class BenefitDeliveryLine(models.Model):
 
     def action_confirm_delivery(self):
         self.ensure_one()
+        if not self.evidence_photo:
+            raise ValidationError(_("Debe adjuntar una foto de evidencia para confirmar la entrega."))
+
         if self.list_id:
             raise ValidationError("No puede confirmar individualmente una línea que pertenece a una lista.")
         
@@ -66,6 +69,11 @@ class BenefitDeliveryLine(models.Model):
         
         self.state = 'delivered'
         self.date_delivered = fields.Datetime.now()
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
 
     @api.constrains('session_id', 'employee_id', 'state')
     def _check_unique_delivery(self):
@@ -86,3 +94,14 @@ class BenefitDeliveryLine(models.Model):
              # Re-check explicitly just in case
              if not (self.session_id.start_date <= now <= self.session_id.end_date):
                  raise ValidationError("No se puede realizar entregas fuera del rango de fechas de la jornada.")
+
+    @api.onchange('employee_id')
+    def _onchange_employee_id(self):
+        # Verifica si el empleado ya ha recibido el beneficio en esta jornada
+        if self.employee_id and not self.employee_id.active:
+            return {'warning':
+                {
+                    'title': 'Advertencia - Empleado Egresado',
+                    'message': f"El empleado {self.employee_id.name} se encuentra marcado como desincorporado (Archivado)."
+                }
+            }

@@ -58,8 +58,7 @@ class BenefitDeliveryLine(models.Model):
 
     def action_confirm_delivery(self):
         self.ensure_one()
-        if not self.evidence_photo:
-            raise ValidationError(_("Debe adjuntar una foto de evidencia para confirmar la entrega."))
+
 
         if self.list_id:
             raise ValidationError("No puede confirmar individualmente una línea que pertenece a una lista.")

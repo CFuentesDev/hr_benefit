@@ -101,7 +101,7 @@
                                 <list editable="bottom">
                                     <field name="employee_id" context="{'benefit_search_cedula': True, 'active_test': False}"/>
                                     <field name="qty_delivered"/>
-                                    <field name="evidence_photo" required="1" widget="benefit_webcam" optional="show"/>
+                                    <field name="evidence_photo" widget="benefit_webcam" optional="show"/>
                                     <field name="state" column_invisible="1"/>
                                 </list>
                             </field>
@@ -180,7 +180,7 @@
                         </group>
                         <group>
                             <field name="date_delivered" readonly="1"/>
-                            <field name="evidence_photo" widget="benefit_webcam" readonly="state == 'delivered'"/>
+                            <field name="evidence_photo" widget="benefit_webcam" readonly="state == 'delivered'" required="1"/>
                         </group>
                     </group>
                 </sheet>

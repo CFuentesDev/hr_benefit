@@ -6,8 +6,7 @@
         <field name="inherit_id" ref="hr.view_department_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='manager_id']" position="after">
-                <field name="level"/>
-                <field name="decorative"/>
+
             </xpath>
         </field>
     </record>

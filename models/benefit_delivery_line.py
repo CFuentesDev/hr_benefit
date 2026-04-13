@@ -1,12 +1,12 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
-
 class BenefitDeliveryLine(models.Model):
     _name = 'benefit.delivery.line'
     _description = 'Línea de Entrega de Beneficio'
+    # NOTA: Eliminamos el _inherit = 'hr.employee' de aquí.
 
-    list_id = fields.Many2one('benefit.delivery.list', string='Lista de Entrega', ondelete='cascade', required=False) # Now optional
+    list_id = fields.Many2one('benefit.delivery.list', string='Lista de Entrega', ondelete='cascade', required=False)
     employee_id = fields.Many2one('hr.employee', string='Empleado', required=True)
     employee_department = fields.Many2one('hr.department', string='Departamento', related='employee_id.department_id', required=True)
 
@@ -15,38 +15,35 @@ class BenefitDeliveryLine(models.Model):
         ('draft', 'Borrador'),
         ('delivered', 'Entregado')
     ], string='Estado', default='draft', compute='_compute_state', store=True, readonly=False) 
-    # Readonly=False to allow manual change if no list_id, but compute handles list logic.
 
     qty_delivered = fields.Float(string='Cantidad Entregada', default=1.0)
     
     # Session management
     session_id = fields.Many2one('benefit.session', string='Jornada', required=True, store=True, 
                                  compute='_compute_session', readonly=False) 
-                                 # Compute sets it from list, but allows manual if no list.
 
     date_delivered = fields.Datetime(string='Fecha de Entrega', default=fields.Datetime.now)
     evidence_photo = fields.Binary(string="Foto Evidencia", attachment=True, help="Tome una foto al momento de la entrega como evidencia.")
 
     @api.model
     def default_get(self, fields_list):
-        defaults = super(BenefitDeliveryLine, self).default_get(fields_list)
-        if 'session_id' in fields_list and not defaults.get('session_id'):
-            # Auto-select active session
+        res = super(BenefitDeliveryLine, self).default_get(fields_list)
+        
+        # Lógica de auto-seleccionar la sesión activa
+        if 'session_id' in fields_list and not res.get('session_id'):
             active_session = self.env['benefit.session'].search([
                 ('is_active', '=', True)
             ], limit=1)
             if active_session:
-                defaults['session_id'] = active_session.id
-        return defaults
+                res['session_id'] = active_session.id
+                
+        return res
 
     @api.depends('list_id', 'list_id.state', 'list_id.session_id')
     def _compute_state(self):
         for record in self:
             if record.list_id:
                 record.state = 'delivered' if record.list_id.state in ['delivered'] else 'draft'
-                # Logic: If list is confirmed, lines are effectively draft until validated (delivered)? 
-                # Or confirmed list means lines are confirmed? 
-                # User prev req: "Entregado" when list is delivered.
             elif not record.state:
                 record.state = 'draft'
 
@@ -58,7 +55,6 @@ class BenefitDeliveryLine(models.Model):
 
     def action_confirm_delivery(self):
         self.ensure_one()
-
 
         if self.list_id:
             raise ValidationError("No puede confirmar individualmente una línea que pertenece a una lista.")
@@ -89,14 +85,12 @@ class BenefitDeliveryLine(models.Model):
 
     def _check_date_range(self):
         now = fields.Datetime.now()
-        if not self.session_id.is_active: # Relies on is_active being consistent with dates
-             # Re-check explicitly just in case
+        if not self.session_id.is_active: 
              if not (self.session_id.start_date <= now <= self.session_id.end_date):
                  raise ValidationError("No se puede realizar entregas fuera del rango de fechas de la jornada.")
 
     @api.onchange('employee_id')
     def _onchange_employee_id(self):
-        # Verifica si el empleado ya ha recibido el beneficio en esta jornada
         if self.employee_id and not self.employee_id.active:
             return {'warning':
                 {

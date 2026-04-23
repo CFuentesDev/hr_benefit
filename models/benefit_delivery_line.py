@@ -10,6 +10,8 @@ class BenefitDeliveryLine(models.Model):
     employee_id = fields.Many2one('hr.employee', string='Empleado', required=True)
     employee_department = fields.Many2one('hr.department', string='Departamento', related='employee_id.department_id', required=True)
 
+    active = fields.Boolean(string="Activo", default=True)
+    
     # State management
     state = fields.Selection([
         ('draft', 'Borrador'),

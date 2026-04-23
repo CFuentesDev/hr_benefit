@@ -6,6 +6,8 @@ class BenefitSession(models.Model):
     _description = 'Jornada de Beneficios'
     _order = 'start_date desc, id desc'
 
+    active = fields.Boolean(string="Activo", default=True)
+
     name = fields.Char(string='Nombre de Jornada', required=True)
     start_date = fields.Datetime(string='Fecha Inicio', required=True, default=fields.Datetime.now)
     end_date = fields.Datetime(string='Fecha Fin', required=True, default=fields.Datetime.now)

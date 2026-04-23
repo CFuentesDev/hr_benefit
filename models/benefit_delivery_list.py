@@ -8,6 +8,8 @@ class BenefitDeliveryListOrigin(models.Model):
 
     name = fields.Char(string='Nombre', required=True)
 
+    active = fields.Boolean(string="Activo", default=True)
+
 
 class BenefitDeliveryList(models.Model):
     _name = 'benefit.delivery.list'

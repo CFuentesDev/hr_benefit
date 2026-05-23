@@ -12,6 +12,15 @@ class HrEmployee(models.Model):
     ], string='Tipo Identificación', default='V', help="Tipo de documento de identidad")
     cedula = fields.Char(string='Cédula', size=8)
 
+class HrEmployeePublic(models.Model):
+    _inherit = 'hr.employee.public'
+
+    identification_type = fields.Selection([
+        ('V', 'V'),
+        ('E', 'E'),
+    ], string='Tipo Identificación', readonly=True)
+    cedula = fields.Char(string='Cédula', readonly=True)
+
     parent_id = fields.Many2one('hr.employee', string="Director/Gerente")
     coach_id = fields.Many2one('hr.employee', string="Supervisor")
     job_id = fields.Many2one('hr.job', string="Cargo Administrativo")

@@ -6,3 +6,8 @@ access_benefit_session_line_manager,benefit.session.line.manager,model_benefit_s
 access_benefit_delivery_list_origin,benefit.delivery.list.origin,model_benefit_delivery_list_origin,hr_benefit.group_benefit_user,1,1,1,1
 access_benefit_delivery_list,benefit.delivery.list,model_benefit_delivery_list,hr_benefit.group_benefit_user,1,1,1,1
 access_benefit_delivery_line,benefit.delivery.line,model_benefit_delivery_line,hr_benefit.group_benefit_user,1,1,1,1
+access_benefit_session_readonly,benefit.session.readonly,model_benefit_session,hr_benefit.group_benefit_readonly,1,0,0,0
+access_benefit_session_line_readonly,benefit.session.line.readonly,model_benefit_session_line,hr_benefit.group_benefit_readonly,1,0,0,0
+access_benefit_delivery_list_origin_readonly,benefit.delivery.list.origin.readonly,model_benefit_delivery_list_origin,hr_benefit.group_benefit_readonly,1,0,0,0
+access_benefit_delivery_list_readonly,benefit.delivery.list.readonly,model_benefit_delivery_list,hr_benefit.group_benefit_readonly,1,0,0,0
+access_benefit_delivery_line_readonly,benefit.delivery.line.readonly,model_benefit_delivery_line,hr_benefit.group_benefit_readonly,1,0,0,0

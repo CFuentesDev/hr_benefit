@@ -20,6 +20,7 @@ class BenefitDeliveryList(models.Model):
     session_id = fields.Many2one('benefit.session', string='Jornada', required=True, domain=[('is_active', '=', True)], default=lambda self: self._default_session())
     origin_id = fields.Many2one('benefit.delivery.list.origin', string='Procedencia')
     responsible_id = fields.Many2one('hr.employee', string='Responsable de Retiro', required=True)
+    active = fields.Boolean(string="Activo", default=True)
     department_ids = fields.Many2many('hr.department', string='Departamentos', help='Departamentos para carga masiva de empleados')
     line_ids = fields.One2many('benefit.delivery.line', 'list_id', string='Beneficiarios')
     state = fields.Selection([
